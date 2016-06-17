@@ -164,4 +164,4 @@ for row in soup.find_all('tr'):
     member['contact_details']=contact_details
     members.append(member)
     print(json.dumps(member,indent=4,sort_keys=True))
-scraperwiki.sqlite.save(unique_keys=['name'], data=members)
+scraperwiki.sqlite.save(unique_keys=['name'], data=members, table_name='data.sqlite')
