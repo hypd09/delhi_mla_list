@@ -39,7 +39,6 @@ def words2date(bdate):
     return date.isoformat()
 
 def text2int(textnum, numwords={}):
-    print(textnum)
     if not numwords:
       units = [
         "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
@@ -66,7 +65,6 @@ def text2int(textnum, numwords={}):
         if scale > 100:
             result += current
             current = 0
-    print (result+current)
     return result + current
 
 def num(s):
@@ -179,7 +177,6 @@ for row in soup.find_all('tr'):
         member['source'],
         member['+spouse']
         ]
-    print(data,c)
     c.execute('insert into data values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',data)
 conn.commit()
 c.close()
