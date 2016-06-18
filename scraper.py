@@ -15,7 +15,6 @@ import os
 from bs4 import BeautifulSoup as Soup
 import json, requests, re
 import datetime
-from pandas.io.json import json_normalize
 
 DB_FILE = 'data.sqlite'
 
