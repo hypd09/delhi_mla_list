@@ -14,7 +14,7 @@ const = re.compile(r'[^a-z0-9\-]')
 conn = sqlite3.connect(DB_FILE)
 c = conn.cursor()
 c.execute('drop table IF EXISTS data')
-c.execute('create table data (birth_date,"+children","+constituency",contact_details,"+education",email,image,images,link,"+marital_status",name,memberOf,other_names,"+place_of_birth","+profession",source,"+spouse")')
+c.execute('create table data (birth_date,"+children","+constituency",contact_details,"+education","+education_details",email,image,images,link,"+marital_status",name,memberOf,other_names,"+place_of_birth","+profession",source,"+spouse")')
 
 def words2date(bdate):
     bdate = clean(rdate.sub(' ',bdate.lower()))
@@ -128,7 +128,8 @@ for row in soup.find_all('tr'):
         'id':clean(cells[2]),
         'name':clean(details[2])
         },
-    '+education' : [clean(details[8])],
+    '+education' : clean(neta.find_all('td')[5].text),
+    '+education_details': [clean(details[8])],
     '+profession' : [clean(details[10])],
     '+marital_status' : True if 'married' in clean(details[12]).lower() else False,
     '+spouse' : clean(details[13]),
@@ -170,7 +171,8 @@ for row in soup.find_all('tr'):
         json.dumps(member['+children'],sort_keys=True),
         json.dumps(member['+constituency'],sort_keys=True),
         json.dumps(member['contact_details'],sort_keys=True),
-        json.dumps(member['+education'],sort_keys=True),
+        member['+education'],
+        json.dumps(member['+education_details'],sort_keys=True),
         member['email'],
         member['image'],
         json.dumps(member['images'],sort_keys=True),
@@ -184,6 +186,6 @@ for row in soup.find_all('tr'):
         member['source'],
         member['+spouse']
         ]
-    c.execute('insert into data values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',data)
+    c.execute('insert into data values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',data)
 conn.commit()
 c.close()
