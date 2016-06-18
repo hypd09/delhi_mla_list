@@ -39,6 +39,7 @@ def words2date(bdate):
     return date.isoformat()
 
 def text2int(textnum, numwords={}):
+    print(textnum)
     if not numwords:
       units = [
         "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
@@ -58,14 +59,14 @@ def text2int(textnum, numwords={}):
     current = result = 0
     for word in textnum.split():
         if word not in numwords:
-          raise Exception("Illegal word: " + word)
+            return 0
 
         scale, increment = numwords[word]
         current = current * scale + increment
         if scale > 100:
             result += current
             current = 0
-
+    print (result+current)
     return result + current
 
 def num(s):
@@ -132,8 +133,8 @@ for row in soup.find_all('tr'):
     '+marital_status' : True if 'married' in clean(details[12]).lower() else False,
     '+spouse' : clean(details[13]),
     '+children' : {
-        'male':num(details[15].lower()),
-        'female':num(details[16].lower())
+        'female':text2int(details[15].lower()),
+        'male':text2int(details[16].lower())
         },
     'source' : 'delhiassembly.nic.in',
     'links' : [{'url':link,'note':'delhiassembly.nic.in'}]
@@ -160,23 +161,23 @@ for row in soup.find_all('tr'):
     member['contact_details']=contact_details
     print(json.dumps(member,sort_keys=True,indent=4))
     data = [
-        json.dumps(member['birth_date'],sort_keys=True),
+        member['birth_date'],
         json.dumps(member['+children'],sort_keys=True),
         json.dumps(member['+constituency'],sort_keys=True),
         json.dumps(member['contact_details'],sort_keys=True),
         json.dumps(member['+education'],sort_keys=True),
-        json.dumps(member['email'],sort_keys=True),
-        json.dumps(member['image'],sort_keys=True),
+        member['email'],
+        member['image'],
         json.dumps(member['images'],sort_keys=True),
         json.dumps(member['links'],sort_keys=True),
         json.dumps(member['+marital_status'],sort_keys=True),
-        json.dumps(member['name'],sort_keys=True),
+        member['name'],
         json.dumps(member['memberOf'],sort_keys=True),
         json.dumps(member['other_names'],sort_keys=True),
-        json.dumps(member['+place_of_birth'],sort_keys=True),
+        member['+place_of_birth'],
         json.dumps(member['+profession'],sort_keys=True),
-        json.dumps(member['source'],sort_keys=True),
-        json.dumps(member['+spouse'],sort_keys=True)
+        member['source'],
+        member['+spouse']
         ]
     print(data,c)
     c.execute('insert into data values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',data)
