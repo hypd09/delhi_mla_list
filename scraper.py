@@ -1,15 +1,3 @@
-# # Write out to the sqlite database using scraperwiki library
-# scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
-# scraperwiki.sql.select("* from data where 'name'='peter'")
-
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
-
 import sqlite3
 import os
 from bs4 import BeautifulSoup as Soup
@@ -70,9 +58,9 @@ def text2int(textnum, numwords={}):
 def num(s):
     s = numb.sub(' ',s)
     s = clean(s)
-    if s is None or len(s)<3:
+    if s is None:
         return 0
-    return text2int(s)
+    return int(s)
 
 def clean(s):
     return rex.sub(' ',s).strip()
@@ -118,7 +106,7 @@ for row in soup.find_all('tr'):
     '+place_of_birth' : clean(details[7]),
     '+constituency' : {
         'name':clean(cells[5]).split('(')[0],
-        'identifier':clean(cells[5]).split('(')[1],
+        'identifier':num(clean(cells[5]).split('(')[1]),
         'classification':'constituency',
         '+state':'Delhi'
         },
