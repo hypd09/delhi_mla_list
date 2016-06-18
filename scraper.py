@@ -67,6 +67,12 @@ def clean(s):
 
 req = requests.get('http://delhiassembly.nic.in/aspfile/whos_who/VIthAssembly/listmembers_VIth_AssemblyWsW.htm')
 soup = Soup(req.text,'html.parser')
+
+members = []
+
+mnlink = 'http://www.myneta.info/delhi2015/index.php?action=show_winners&sort=default'
+myneta = Soup(requests.get(mnlink).text,'html.parser')
+
 for row in soup.find_all('tr'):
     member = {}
     if 'Sr. No.' in row.text: #skipping the first one
@@ -90,6 +96,14 @@ for row in soup.find_all('tr'):
         detail = clean(text.split(':')[1]) if 'Profession'not in text else clean(text.split(':')[2])
         details.append(detail)
         
+    name = clean(details[0])
+    neta = ''
+    for tr in myneta.find_all('tr'):
+        if name.lower() in tr.text.lower():
+            neta = tr
+            break
+
+    
     bdate = clean(details[6])
     member = {
     'other_names' : [
@@ -123,7 +137,10 @@ for row in soup.find_all('tr'):
         'male':text2int(details[16].lower())
         },
     'source' : 'delhiassembly.nic.in',
-    'links' : [{'url':link,'note':'delhiassembly.nic.in'}]
+    'links' : [
+        {'url':link,'note':'delhiassembly.nic.in'},
+        {'url':neta.find_all('a')[1]['href'],'note':'myneta.info'}
+        ]
     }
     contact_details = [
             {
@@ -146,6 +163,8 @@ for row in soup.find_all('tr'):
             })
     member['contact_details']=contact_details
     print(json.dumps(member,sort_keys=True,indent=4))
+    members.append(member)
+    
     data = [
         member['birth_date'],
         json.dumps(member['+children'],sort_keys=True),
