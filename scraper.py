@@ -1,8 +1,7 @@
-import sqlite3
-import os
 from bs4 import BeautifulSoup as Soup
-import json, requests, re
-import datetime
+import json, requests, re, datetime, sqlite3
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 
 DB_FILE = 'data.sqlite'
 
@@ -97,12 +96,37 @@ for row in soup.find_all('tr'):
         details.append(detail)
         
     name = clean(details[0])
-    neta = ''
+    neta = None
+    names = []
     for tr in myneta.find_all('tr'):
-        if name.lower() in tr.text.lower():
+        tds = tr.find_all('td')
+        if len(tds)!=8:
+            continue
+        names.append(tr)
+        if name.lower() in clean(tds[1].text).lower():
             neta = tr
             break
-
+        
+    if neta is None:
+        na = clean(name.replace('.',' '))
+        na = ' '.join(name.split()[1:])
+        for tr in names:
+            tds = tr.find_all('td')
+            if na.lower() in clean(tds[1].text).lower():
+                neta = tr
+                break
+            
+    if neta is None:
+        old_fuz = -1
+        new_name = ''
+        for tr in names:
+            tds = tr.find_all('td')
+            new_fuz = fuzz.ratio(name.lower(),clean(tds[1].text).lower())
+            if new_fuz>old_fuz:
+                neta = tr
+                old_fuz = new_fuz
+                new_name = clean(tds[1].text).title()
+        name = new_name
     
     bdate = clean(details[6])
     member = {
@@ -112,7 +136,7 @@ for row in soup.find_all('tr'):
             'note' : 'Name with prefix'
          }
         ],
-    'name' : clean(details[0]),
+    'name' : name,
     'email' : clean(cells[6]),
     'birth_date' : words2date(bdate),
     'image' : 'http://delhiassembly.nic.in/aspfile/whos_who/VIthAssembly/WhosWho/'+ds.find('img')['src'],
